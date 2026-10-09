@@ -1,0 +1,1866 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0D1B2A" />
+  <title>Mickey's Magical Focus Station</title>
+  <meta name="description" content="Mickey's Magical Focus Station — 開啟專注魔法，與米奇一起完成今日任務！" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='9' cy='9' r='6' fill='%23FFD700'/%3E%3Ccircle cx='23' cy='9' r='6' fill='%23FFD700'/%3E%3Ccircle cx='16' cy='20' r='11' fill='%23FFD700'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti (fireworks) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 950: '#080F1C', 900: '#0D1B2A', 800: '#132038', 700: '#1B263B' },
+            gold: { DEFAULT: '#FFD700', deep: '#E0A800', soft: '#FFF0B3' },
+            mickey: { DEFAULT: '#E60012', dark: '#A80D14' }
+          },
+          fontFamily: {
+            display: ['"Baloo 2"', '"Noto Sans TC"', 'cursive'],
+            body: ['Nunito', '"Noto Sans TC"', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ============================================================
+       MICKEY'S MAGICAL FOCUS STATION — DESIGN SYSTEM
+       ============================================================ */
+    :root {
+      /* palette */
+      --navy-950: #080F1C;
+      --navy-900: #0D1B2A;
+      --navy-800: #132038;
+      --navy-700: #1B263B;
+      --gold: #FFD700;
+      --gold-deep: #E0A800;
+      --gold-soft: #FFF0B3;
+      --mickey-red: #E60012;
+      --mickey-red-dark: #A80D14;
+      --ink: #050A12;
+
+      /* surfaces */
+      --glass-bg: linear-gradient(158deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .028) 42%, rgba(255, 215, 0, .06));
+      --glass-border: rgba(255, 215, 0, .22);
+      --glass-border-soft: rgba(255, 255, 255, .14);
+      --text: #EAF0FA;
+      --text-dim: #A6B6D0;
+
+      /* elevation */
+      --shadow-card: 0 30px 70px -28px rgba(0, 0, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .10);
+      --shadow-gold: 0 0 26px rgba(255, 215, 0, .38);
+      --shadow-red: 0 14px 30px -12px rgba(230, 0, 18, .95);
+
+      --radius-xl: 28px;
+      --radius-md: 18px;
+
+      --font-display: 'Baloo 2', 'Noto Sans TC', cursive;
+      --font-body: 'Nunito', 'Noto Sans TC', sans-serif;
+
+      --ease-smooth: cubic-bezier(.4, 0, .2, 1);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    html body {
+      height: auto;
+      min-height: 100vh;
+      background: var(--navy-900);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* the React template mount point stays in the file but out of the way */
+    html body #root {
+      display: none !important;
+    }
+
+    /* ---------- scenery: sky, stars, castle ---------- */
+    .sky {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 85% at 50% -12%, #24324F 0%, var(--navy-700) 30%, #12203A 62%, var(--navy-900) 100%);
+    }
+
+    .sky::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(60% 40% at 50% 108%, rgba(255, 215, 0, .16), transparent 70%);
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #FFFFFF;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: .14; transform: scale(.7); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .castle {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      width: 100%;
+      height: clamp(160px, 36vh, 348px);
+      pointer-events: none;
+    }
+
+    .castle svg { display: block; width: 100%; height: 100%; }
+
+    .win { fill: var(--gold); opacity: .35; animation: flicker 5s ease-in-out infinite; }
+
+    @keyframes flicker {
+      0%, 100% { opacity: .22; }
+      45% { opacity: .78; }
+      60% { opacity: .45; }
+    }
+
+    /* ---------- page shell ---------- */
+    .page {
+      position: relative;
+      z-index: 3;
+      padding: clamp(26px, 5vw, 56px) clamp(14px, 4vw, 34px) clamp(120px, 24vh, 280px);
+    }
+
+    .shell { max-width: 1120px; margin: 0 auto; }
+
+    /* ---------- hero ---------- */
+    .hero { text-align: center; margin-bottom: clamp(24px, 4vw, 40px); }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 215, 0, .08);
+      color: var(--gold-soft);
+      font-size: 12px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .hero-title {
+      margin: 18px 0 0;
+      font-family: var(--font-display);
+      font-weight: 800;
+      line-height: 1.05;
+      font-size: clamp(30px, 6.4vw, 62px);
+      letter-spacing: .01em;
+      background: linear-gradient(180deg, #FFFDF2 0%, var(--gold) 42%, var(--gold-deep) 78%, #B87F00 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 4px 18px rgba(255, 215, 0, .38)) drop-shadow(0 0 46px rgba(255, 215, 0, .22));
+      animation: titleGlow 4.5s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { filter: drop-shadow(0 4px 16px rgba(255, 215, 0, .30)) drop-shadow(0 0 40px rgba(255, 215, 0, .16)); }
+      50% { filter: drop-shadow(0 4px 24px rgba(255, 215, 0, .55)) drop-shadow(0 0 74px rgba(255, 215, 0, .34)); }
+    }
+
+    .hero-sub {
+      margin: 14px auto 0;
+      max-width: 620px;
+      color: var(--text-dim);
+      font-size: clamp(14px, 2.2vw, 17px);
+      letter-spacing: .02em;
+    }
+
+    .hero-rule {
+      margin: 22px auto 0;
+      width: 190px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: .7;
+    }
+
+    /* ---------- glass card ---------- */
+    .glass-card {
+      position: relative;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--glass-border);
+      background-image: var(--glass-bg);
+      background-color: rgba(13, 27, 42, .56);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      box-shadow: var(--shadow-card);
+      padding: clamp(18px, 3vw, 32px);
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(78% 58% at 50% -6%, rgba(255, 215, 0, .12), transparent 62%);
+      pointer-events: none;
+    }
+
+    .card-head { position: relative; text-align: center; margin-bottom: clamp(14px, 2.4vw, 22px); }
+
+    .card-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(17px, 2.6vw, 21px);
+      color: var(--gold-soft);
+      letter-spacing: .06em;
+    }
+
+    .card-sub { margin: 6px 0 0; font-size: 13px; color: var(--text-dim); }
+
+    .grid-main {
+      display: grid;
+      gap: clamp(18px, 2.4vw, 26px);
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      .grid-main { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); align-items: start; }
+    }
+
+    /* ---------- mickey timer ---------- */
+    .timer-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(2px, 1.6vw, 30px);
+      padding: clamp(6px, 1.6vw, 14px) 0 clamp(14px, 2vw, 22px);
+    }
+
+    .mickey {
+      --head: clamp(174px, 46vw, 262px);
+      --ear: calc(var(--head) * .38);
+      --reel-h: clamp(44px, 11.5vw, 66px);
+      --reel-w: clamp(50px, 12.5vw, 72px);
+      position: relative;
+      width: calc(var(--head) + var(--ear));
+      height: calc(var(--head) + var(--ear) * .8);
+      flex: 0 0 auto;
+    }
+
+    .mickey .ear,
+    .mickey .head {
+      background: radial-gradient(circle at 36% 26%, #2E3D5C, #121A2B 55%, #070C14 100%);
+      border: 2px solid rgba(255, 215, 0, .30);
+      box-shadow: 0 20px 44px -16px rgba(0, 0, 0, .95), inset 0 -10px 26px rgba(0, 0, 0, .8), inset 0 6px 16px rgba(255, 255, 255, .07);
+    }
+
+    .mickey .ear { position: absolute; top: 0; width: var(--ear); height: var(--ear); border-radius: 50%; }
+    .mickey .ear-l { left: 0; }
+    .mickey .ear-r { right: 0; }
+
+    .mickey .head {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--head);
+      height: var(--head);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+
+    /* remaining-time progress ring */
+    .head-ring {
+      position: absolute;
+      inset: -9px;
+      border-radius: 50%;
+      background: conic-gradient(from -90deg, var(--gold) calc(var(--progress, 0) * 1%), rgba(255, 255, 255, .055) 0);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+      opacity: .9;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, .55));
+    }
+
+    .mickey.running .head { box-shadow: 0 20px 44px -16px rgba(0, 0, 0, .95), inset 0 -10px 26px rgba(0, 0, 0, .8), 0 0 42px rgba(255, 215, 0, .30); }
+
+    .rollers { position: relative; z-index: 2; display: flex; align-items: flex-start; gap: clamp(5px, 1.4vw, 10px); }
+
+    .roller-col { display: flex; flex-direction: column; align-items: center; }
+
+    .roller {
+      position: relative;
+      width: var(--reel-w);
+      height: var(--reel-h);
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .62), rgba(21, 30, 48, .9));
+      border: 1px solid rgba(255, 215, 0, .34);
+      box-shadow: inset 0 0 22px rgba(0, 0, 0, .9), 0 8px 20px -10px rgba(0, 0, 0, .95);
+      transition: border-color .25s var(--ease-smooth), box-shadow .25s var(--ease-smooth);
+    }
+
+    .roller:hover { border-color: rgba(255, 215, 0, .6); }
+    .roller.dragging { cursor: grabbing; border-color: var(--gold); box-shadow: inset 0 0 22px rgba(0, 0, 0, .9), var(--shadow-gold); }
+
+    .roller::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(8, 15, 28, .96), transparent 32%, transparent 68%, rgba(8, 15, 28, .96));
+    }
+
+    .reel { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
+
+    .reel-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--reel-h);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: calc(var(--reel-h) * .6);
+      color: var(--gold-soft);
+      text-shadow: 0 0 16px rgba(255, 215, 0, .6);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .roller-label {
+      display: block;
+      margin-top: 7px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .26em;
+      color: rgba(255, 215, 0, .6);
+    }
+
+    .colon {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: calc(var(--reel-h) * .46);
+      line-height: 1;
+      margin-top: calc(var(--reel-h) * .22);
+      color: var(--gold);
+      text-shadow: var(--shadow-gold);
+      animation: colonBlink 2s steps(1, end) infinite;
+    }
+
+    @keyframes colonBlink {
+      0%, 60% { opacity: 1; }
+      61%, 100% { opacity: .35; }
+    }
+
+    .sparkles { position: absolute; inset: -14px; pointer-events: none; }
+
+    .spark {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px rgba(255, 215, 0, .95);
+      animation: floaty 6s ease-in-out infinite;
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0) scale(.7); opacity: .25; }
+      50% { transform: translateY(-14px) scale(1.15); opacity: 1; }
+    }
+
+    /* ---------- lever ---------- */
+    .lever {
+      position: relative;
+      flex: 0 0 auto;
+      width: clamp(48px, 10vw, 68px);
+      height: clamp(170px, 34vw, 220px);
+      cursor: pointer;
+      background: none;
+      border: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .lever-rail {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 9px;
+      height: 62%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #7A5C15, #FFE882 45%, #A87C1B);
+      box-shadow: 0 0 18px rgba(255, 215, 0, .35), inset 0 0 6px rgba(0, 0, 0, .5);
+    }
+
+    .lever-grip {
+      position: absolute;
+      top: 56%;
+      left: 50%;
+      transform: translate(-50%, -14px);
+      transition: transform .58s cubic-bezier(.34, 1.42, .5, 1);
+      display: grid;
+      place-items: center;
+    }
+
+    .lever.engaged .lever-grip { transform: translate(-50%, 34px); }
+
+    .lever-knob {
+      width: clamp(30px, 6.5vw, 40px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 215, 0, .6);
+      background: radial-gradient(circle at 34% 28%, #FF6E6E, var(--mickey-red) 46%, var(--mickey-red-dark) 100%);
+      box-shadow: 0 12px 22px -8px rgba(0, 0, 0, .9), inset 0 -4px 10px rgba(0, 0, 0, .5), 0 0 22px rgba(230, 0, 18, .5);
+    }
+
+    .lever-shadow {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82%;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 215, 0, .22), rgba(255, 255, 255, .03));
+      border: 1px solid rgba(255, 215, 0, .22);
+    }
+
+    .lever-hint {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: .2em;
+      color: rgba(255, 215, 0, .55);
+      white-space: nowrap;
+    }
+
+    /* ---------- controls ---------- */
+    .preset-row,
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .preset-row { margin-bottom: 14px; }
+
+    /* doubled class selectors keep these above Tailwind's preflight resets */
+    .btn.btn {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: .04em;
+      border-radius: 999px;
+      padding: .74rem 1.6rem;
+      font-size: clamp(14px, 2.2vw, 16px);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform .16s var(--ease-smooth), box-shadow .28s var(--ease-smooth), filter .2s var(--ease-smooth), color .2s;
+    }
+
+    .btn:active { transform: translateY(1px) scale(.985); }
+
+    .btn-start.btn-start {
+      color: #FFF6F6;
+      background: linear-gradient(180deg, #FF4343, var(--mickey-red) 46%, var(--mickey-red-dark));
+      box-shadow: var(--shadow-red), inset 0 1px 0 rgba(255, 255, 255, .45);
+    }
+
+    .btn-start:hover { filter: brightness(1.08); box-shadow: var(--shadow-red), var(--shadow-gold); }
+
+    .btn-reset.btn-reset {
+      color: var(--text-dim);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
+      border-color: var(--glass-border-soft);
+    }
+
+    .btn-reset:hover { color: var(--text); border-color: rgba(255, 215, 0, .45); }
+
+    .chip.chip {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(12.5px, 2vw, 14.5px);
+      letter-spacing: .04em;
+      padding: .55rem 1.15rem;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--gold-soft);
+      background: rgba(255, 215, 0, .08);
+      border: 1px solid var(--glass-border);
+      transition: all .22s var(--ease-smooth);
+    }
+
+    .chip:hover { background: rgba(255, 215, 0, .18); border-color: var(--gold); box-shadow: var(--shadow-gold); transform: translateY(-1px); }
+    .chip.active { background: linear-gradient(180deg, rgba(255, 215, 0, .30), rgba(255, 215, 0, .12)); border-color: var(--gold); color: #FFFDF2; }
+
+    .status-line {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: .05em;
+      color: var(--text-dim);
+      min-height: 20px;
+    }
+
+    .status-line strong { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+    .glass-card.celebrate { animation: cardCelebrate 2.6s ease-out; }
+
+    @keyframes cardCelebrate {
+      0% { box-shadow: var(--shadow-card); }
+      22% { box-shadow: var(--shadow-card), 0 0 60px rgba(255, 215, 0, .55); }
+      100% { box-shadow: var(--shadow-card); }
+    }
+
+    /* ---------- soundboard ---------- */
+    .sound-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0 auto 14px;
+      padding: 9px 14px;
+      width: fit-content;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--gold-soft);
+      background: rgba(255, 215, 0, .09);
+      border: 1px dashed var(--glass-border);
+      transition: opacity .5s var(--ease-smooth), transform .5s var(--ease-smooth);
+    }
+
+    .sound-hint.is-off { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+
+    .sound-list { display: grid; gap: 12px; position: relative; }
+
+    .sound-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border-soft);
+      background: linear-gradient(150deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .02));
+      transition: border-color .25s var(--ease-smooth), box-shadow .25s var(--ease-smooth), background .25s;
+    }
+
+    .sound-row:hover { border-color: rgba(255, 215, 0, .4); }
+    .sound-row.is-live { border-color: rgba(255, 215, 0, .5); box-shadow: 0 0 26px -12px rgba(255, 215, 0, .7); }
+
+    .sound-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      color: var(--gold);
+      background: radial-gradient(circle at 32% 26%, rgba(255, 215, 0, .30), rgba(255, 215, 0, .06));
+      border: 1px solid var(--glass-border);
+    }
+
+    .sound-name {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--text);
+      letter-spacing: .02em;
+      line-height: 1.25;
+    }
+
+    .sound-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+
+    .sound-ctrl { display: flex; align-items: center; gap: 12px; }
+
+    .mute-btn.mute-btn {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--gold-soft);
+      background: rgba(255, 215, 0, .10);
+      border: 1px solid var(--glass-border);
+      transition: all .22s var(--ease-smooth);
+    }
+
+    .mute-btn:hover { background: rgba(255, 215, 0, .2); }
+    .mute-btn .icon-off { display: none; }
+    .mute-btn.is-muted { color: var(--text-dim); background: rgba(255, 255, 255, .06); border-color: var(--glass-border-soft); }
+    .mute-btn.is-muted .icon-on { display: none; }
+    .mute-btn.is-muted .icon-off { display: block; }
+
+    .vol-wrap { display: flex; align-items: center; gap: 9px; min-width: 132px; }
+
+    .vol.vol {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--gold) calc(var(--val, 0) * 1%), rgba(255, 255, 255, .14) 0);
+    }
+
+    .vol::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 28%, #FFF6C9, var(--gold) 55%, var(--gold-deep));
+      border: 2px solid rgba(13, 27, 42, .9);
+      box-shadow: 0 0 12px rgba(255, 215, 0, .75);
+      cursor: pointer;
+    }
+
+    .vol::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid rgba(13, 27, 42, .9);
+      box-shadow: 0 0 12px rgba(255, 215, 0, .75);
+      cursor: pointer;
+    }
+
+    .vol-val {
+      width: 38px;
+      text-align: right;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--gold-soft);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 560px) {
+      .sound-row { grid-template-columns: auto minmax(0, 1fr); }
+      .sound-ctrl { grid-column: 1 / -1; justify-content: space-between; }
+      .vol-wrap { flex: 1; min-width: 0; }
+    }
+
+    /* ---------- quote ---------- */
+    .quote-wrap { margin-top: clamp(20px, 3vw, 30px); }
+
+    .quote-card {
+      position: relative;
+      text-align: center;
+      padding: clamp(20px, 3.2vw, 34px) clamp(18px, 3vw, 40px);
+    }
+
+    .quote-mark {
+      font-family: var(--font-display);
+      font-size: 46px;
+      line-height: .5;
+      color: rgba(255, 215, 0, .45);
+    }
+
+    .quote-text {
+      margin: 10px auto 0;
+      max-width: 660px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(15px, 2.6vw, 20px);
+      line-height: 1.55;
+      color: #F6F9FF;
+      transition: opacity .28s var(--ease-smooth), transform .28s var(--ease-smooth);
+    }
+
+    .quote-author {
+      margin-top: 12px;
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      transition: opacity .28s var(--ease-smooth);
+    }
+
+    .quote-fading .quote-text { opacity: 0; transform: translateY(6px); }
+    .quote-fading .quote-author { opacity: 0; }
+
+    .quote-btn { margin-top: 18px; }
+
+    .footer-note {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: .18em;
+      color: rgba(166, 182, 208, .65);
+      text-transform: uppercase;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <div class="stars" id="stars" aria-hidden="true"></div>
+
+  <div class="castle" aria-hidden="true">
+    <svg viewBox="0 0 1440 330" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <radialGradient id="castleGlow" cx="50%" cy="100%" r="70%">
+          <stop offset="0%" stop-color="#FFD700" stop-opacity=".38" />
+          <stop offset="100%" stop-color="#FFD700" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="720" cy="330" rx="560" ry="110" fill="url(#castleGlow)" />
+
+      <g fill="#060C16">
+        <rect x="0" y="262" width="1440" height="68" />
+        <rect x="104" y="212" width="54" height="120" rx="6" />
+        <polygon points="96,212 131,152 166,212" />
+        <rect x="1282" y="212" width="54" height="120" rx="6" />
+        <polygon points="1274,212 1309,152 1344,212" />
+        <rect x="288" y="180" width="78" height="152" rx="8" />
+        <polygon points="278,180 327,112 376,180" />
+        <rect x="1074" y="180" width="78" height="152" rx="8" />
+        <polygon points="1064,180 1113,112 1162,180" />
+        <rect x="430" y="230" width="164" height="102" rx="8" />
+        <rect x="846" y="230" width="164" height="102" rx="8" />
+        <rect x="586" y="218" width="268" height="114" rx="8" />
+        <rect x="470" y="218" width="18" height="14" rx="3" />
+        <rect x="500" y="218" width="18" height="14" rx="3" />
+        <rect x="530" y="218" width="18" height="14" rx="3" />
+        <rect x="892" y="218" width="18" height="14" rx="3" />
+        <rect x="922" y="218" width="18" height="14" rx="3" />
+        <rect x="952" y="218" width="18" height="14" rx="3" />
+        <rect x="636" y="120" width="168" height="212" rx="8" />
+        <polygon points="618,122 720,38 822,122" />
+        <polygon points="710,44 720,0 730,44" />
+        <circle cx="720" cy="7" r="6" />
+      </g>
+
+      <g>
+        <circle class="win" cx="131" cy="236" r="6" style="animation-delay:.2s" />
+        <circle class="win" cx="327" cy="206" r="7" style="animation-delay:1.1s" />
+        <circle class="win" cx="327" cy="252" r="7" style="animation-delay:2.4s" />
+        <circle class="win" cx="1113" cy="206" r="7" style="animation-delay:.7s" />
+        <circle class="win" cx="1113" cy="252" r="7" style="animation-delay:3s" />
+        <circle class="win" cx="1309" cy="236" r="6" style="animation-delay:1.8s" />
+        <rect class="win" x="452" y="252" width="14" height="20" rx="7" style="animation-delay:.9s" />
+        <rect class="win" x="490" y="252" width="14" height="20" rx="7" style="animation-delay:2.1s" />
+        <rect class="win" x="866" y="252" width="14" height="20" rx="7" style="animation-delay:1.4s" />
+        <rect class="win" x="904" y="252" width="14" height="20" rx="7" style="animation-delay:2.9s" />
+        <rect class="win" x="700" y="152" width="40" height="48" rx="20" style="animation-delay:.4s" />
+        <circle class="win" cx="666" cy="224" r="7" style="animation-delay:1.6s" />
+        <circle class="win" cx="774" cy="224" r="7" style="animation-delay:2.6s" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="page">
+    <div class="shell">
+      <header class="hero">
+        <span class="hero-badge">Magic Focus Station</span>
+        <h1 class="hero-title">Mickey's Magical Focus Station</h1>
+        <p class="hero-sub">開啟專注魔法，與米奇一起完成今日任務！</p>
+        <div class="hero-rule"></div>
+      </header>
+
+      <main class="grid-main">
+        <!-- ============ TIMER ============ -->
+        <section class="glass-card" id="timerCard">
+          <div class="card-head">
+            <h2 class="card-title">魔法專注計時器</h2>
+            <p class="card-sub">拖曳或滾動數字轉盤設定時間，拉下米奇拉桿開始</p>
+          </div>
+
+          <div class="timer-stage">
+            <div class="mickey" id="mickey">
+              <span class="ear ear-l"></span>
+              <span class="ear ear-r"></span>
+              <div class="head" id="mickeyHead">
+                <span class="head-ring" aria-hidden="true"></span>
+                <div class="rollers">
+                  <div class="roller-col">
+                    <div class="roller" data-roller="min" role="slider" aria-label="分鐘" aria-valuemin="0" aria-valuemax="59" aria-valuenow="25">
+                      <div class="reel"></div>
+                    </div>
+                    <span class="roller-label">MIN</span>
+                  </div>
+                  <span class="colon">:</span>
+                  <div class="roller-col">
+                    <div class="roller" data-roller="sec" role="slider" aria-label="秒" aria-valuemin="0" aria-valuemax="59" aria-valuenow="0">
+                      <div class="reel"></div>
+                    </div>
+                    <span class="roller-label">SEC</span>
+                  </div>
+                </div>
+                <div class="sparkles" id="sparkles" aria-hidden="true"></div>
+              </div>
+            </div>
+
+            <button class="lever" id="lever" type="button" aria-label="拉下米奇拉桿">
+              <span class="lever-rail"></span>
+              <span class="lever-grip"><span class="lever-knob"></span></span>
+              <span class="lever-shadow"></span>
+              <span class="lever-hint">PULL</span>
+            </button>
+          </div>
+
+          <div class="preset-row">
+            <button class="chip active" type="button" data-preset="25">[ 25m Focus ]</button>
+            <button class="chip" type="button" data-preset="5">[ 5m Break ]</button>
+          </div>
+
+          <div class="control-row">
+            <button class="btn btn-start" id="btnStart" type="button">[ ▶ Start ]</button>
+            <button class="btn btn-reset" id="btnReset" type="button">[ ↺ Reset ]</button>
+            <button class="chip" id="btnChime" type="button">[ 🔔 試聽完成音效 ]</button>
+          </div>
+
+          <p class="status-line" id="statusLine">準備開始 <strong>25:00</strong> 的專注魔法</p>
+        </section>
+
+        <!-- ============ SOUNDBOARD ============ -->
+        <section class="glass-card">
+          <div class="card-head">
+            <h2 class="card-title">迪士尼音效台</h2>
+            <p class="card-sub">調節音量，打造你的專注氛圍</p>
+          </div>
+
+          <div class="sound-hint" id="soundHint">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4V5z" />
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+            </svg>
+            點擊任一處即可開啟環境音效
+          </div>
+
+          <div class="sound-list">
+            <div class="sound-row" data-ch="fireworks">
+              <div class="sound-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z" />
+                  <path d="M18 11V4H6v7" />
+                  <path d="M15 22v-4a3 3 0 0 0-6 0v4" />
+                  <path d="M6 4V2" /><path d="M10 4V2" /><path d="M14 4V2" /><path d="M18 4V2" />
+                </svg>
+              </div>
+              <div>
+                <div class="sound-name">🎆 Castle Fireworks</div>
+                <div class="sound-desc">城堡上空的璀璨煙火</div>
+              </div>
+              <div class="sound-ctrl">
+                <button class="mute-btn" type="button" aria-pressed="false" aria-label="靜音切換">
+                  <svg class="icon-on" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                  </svg>
+                  <svg class="icon-off" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                  </svg>
+                </button>
+                <label class="vol-wrap">
+                  <input class="vol" type="range" min="0" max="100" value="55" style="--val:55" aria-label="煙火音量" />
+                  <span class="vol-val">55%</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="sound-row" data-ch="rain">
+              <div class="sound-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.24" />
+                  <path d="M16 14v6" /><path d="M8 14v6" /><path d="M12 16v6" />
+                </svg>
+              </div>
+              <div>
+                <div class="sound-name">🌧️ Rainy Disneyland</div>
+                <div class="sound-desc">雨中的迪士尼樂園</div>
+              </div>
+              <div class="sound-ctrl">
+                <button class="mute-btn" type="button" aria-pressed="false" aria-label="靜音切換">
+                  <svg class="icon-on" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                  </svg>
+                  <svg class="icon-off" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                  </svg>
+                </button>
+                <label class="vol-wrap">
+                  <input class="vol" type="range" min="0" max="100" value="45" style="--val:45" aria-label="雨聲音量" />
+                  <span class="vol-val">45%</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="sound-row" data-ch="cafe">
+              <div class="sound-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2v2" /><path d="M14 2v2" /><path d="M6 2v2" />
+                  <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
+                </svg>
+              </div>
+              <div>
+                <div class="sound-name">☕ Mickey's Cafe</div>
+                <div class="sound-desc">米奇咖啡館的溫暖午後</div>
+              </div>
+              <div class="sound-ctrl">
+                <button class="mute-btn" type="button" aria-pressed="false" aria-label="靜音切換">
+                  <svg class="icon-on" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                  </svg>
+                  <svg class="icon-off" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                  </svg>
+                </button>
+                <label class="vol-wrap">
+                  <input class="vol" type="range" min="0" max="100" value="40" style="--val:40" aria-label="咖啡館音量" />
+                  <span class="vol-val">40%</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="quote-wrap">
+        <section class="glass-card quote-card" id="quoteCard">
+          <div class="quote-mark">&ldquo;</div>
+          <p class="quote-text" id="quoteText">只要你有勇氣去追求，所有的夢想都能成真。</p>
+          <div class="quote-author" id="quoteAuthor">Walt Disney</div>
+          <button class="btn btn-reset quote-btn" id="btnQuote" type="button">[ 🎲 換一句 ]</button>
+        </section>
+        <p class="footer-note">Magical Focus Station · 專注每一分鐘的魔法</p>
+      </footer>
+    </div>
+  </div>
+
+  <div id="root"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ==================================================================
+         1. STARS
+         ================================================================== */
+      (function buildStars() {
+        var layer = document.getElementById("stars");
+        if (!layer) return;
+        var count = window.innerWidth < 700 ? 70 : 130;
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < count; i++) {
+          var s = document.createElement("span");
+          s.className = "star";
+          var size = (Math.random() * 2.2 + 1).toFixed(1);
+          s.style.width = size + "px";
+          s.style.height = size + "px";
+          s.style.left = (Math.random() * 100).toFixed(2) + "%";
+          s.style.top = (Math.random() * 88).toFixed(2) + "%";
+          s.style.animationDuration = (2.2 + Math.random() * 4.6).toFixed(2) + "s";
+          s.style.animationDelay = (-Math.random() * 6).toFixed(2) + "s";
+          if (Math.random() > 0.84) {
+            s.style.background = "#FFD700";
+            s.style.boxShadow = "0 0 8px rgba(255,215,0,.9)";
+          }
+          frag.appendChild(s);
+        }
+        layer.appendChild(frag);
+      })();
+
+      /* sparkles around Mickey's head */
+      (function buildSparkles() {
+        var box = document.getElementById("sparkles");
+        if (!box) return;
+        for (var i = 0; i < 8; i++) {
+          var sp = document.createElement("span");
+          sp.className = "spark";
+          var a = (i / 8) * Math.PI * 2;
+          sp.style.left = (50 + Math.cos(a) * 46) + "%";
+          sp.style.top = (50 + Math.sin(a) * 46) + "%";
+          sp.style.animationDelay = (-i * 0.7).toFixed(1) + "s";
+          sp.style.animationDuration = (4.5 + Math.random() * 3).toFixed(1) + "s";
+          box.appendChild(sp);
+        }
+      })();
+
+      /* ==================================================================
+         2. AUDIO ENGINE (Web Audio API synthesis)
+         ================================================================== */
+      var actx = null;
+      var masterGain = null;
+      var sfxGain = null;
+      var noiseBuf = null;
+      var audioReady = false;
+
+      var CH = {
+        fireworks: { muted: false, vol: 55, out: null, timer: 0, base: 0.85 },
+        rain: { muted: false, vol: 45, out: null, timer: 0, base: 0.5 },
+        cafe: { muted: false, vol: 40, out: null, timer: 0, base: 0.62 }
+      };
+
+      function audioCtx() {
+        if (actx) return actx;
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        try { actx = new AC(); } catch (e) { actx = null; }
+        return actx;
+      }
+
+      function initAudio() {
+        var c = audioCtx();
+        if (!c) return false;
+        if (c.state === "suspended") { c.resume(); }
+        if (audioReady) return true;
+
+        masterGain = c.createGain();
+        masterGain.gain.value = 0.85;
+        masterGain.connect(c.destination);
+
+        sfxGain = c.createGain();
+        sfxGain.gain.value = 1;
+        sfxGain.connect(masterGain);
+
+        var len = Math.floor(c.sampleRate * 3);
+        noiseBuf = c.createBuffer(1, len, c.sampleRate);
+        var data = noiseBuf.getChannelData(0);
+        for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+
+        buildFireworks(c);
+        buildRain(c);
+        buildCafe(c);
+
+        audioReady = true;
+        ["fireworks", "rain", "cafe"].forEach(applyChannel);
+        var hint = document.getElementById("soundHint");
+        if (hint) hint.classList.add("is-off");
+        return true;
+      }
+
+      function applyChannel(key) {
+        var ch = CH[key];
+        if (!ch || !ch.out || !actx) return;
+        var target = (ch.muted ? 0 : 1) * (ch.vol / 100) * ch.base;
+        ch.out.gain.cancelScheduledValues(actx.currentTime);
+        ch.out.gain.setTargetAtTime(target, actx.currentTime, 0.14);
+        var row = document.querySelector('.sound-row[data-ch="' + key + '"]');
+        if (row) row.classList.toggle("is-live", !ch.muted && ch.vol > 0);
+      }
+
+      function noiseOn(c, rate) {
+        var src = c.createBufferSource();
+        src.buffer = noiseBuf;
+        src.loop = true;
+        if (rate) src.playbackRate.value = rate;
+        return src;
+      }
+
+      /* --- fireworks pops --- */
+      function popSound(c, out) {
+        var t = c.currentTime + 0.01;
+        var src = noiseOn(c, 0.8 + Math.random() * 0.5);
+        var bp = c.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.Q.value = 0.9;
+        bp.frequency.setValueAtTime(2200 + Math.random() * 1400, t);
+        bp.frequency.exponentialRampToValueAtTime(260, t + 0.38);
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.9, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        src.connect(bp); bp.connect(g); g.connect(out);
+        src.start(t, Math.random() * 2);
+        src.stop(t + 0.7);
+
+        var o = c.createOscillator();
+        var og = c.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(110, t);
+        o.frequency.exponentialRampToValueAtTime(42, t + 0.28);
+        og.gain.setValueAtTime(0.0001, t);
+        og.gain.exponentialRampToValueAtTime(0.55, t + 0.02);
+        og.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+        o.connect(og); og.connect(out);
+        o.start(t); o.stop(t + 0.5);
+      }
+
+      function buildFireworks(c) {
+        var ch = CH.fireworks;
+        ch.out = c.createGain();
+        ch.out.gain.value = 0;
+        ch.out.connect(masterGain);
+
+        (function schedule() {
+          if (!audioReady) return;
+          if (!document.hidden) {
+            popSound(c, ch.out);
+            if (Math.random() > 0.6) setTimeout(function () { popSound(c, ch.out); }, 180);
+          }
+          ch.timer = setTimeout(schedule, 1100 + Math.random() * 2400);
+        })();
+      }
+
+      /* --- rain + distant thunder --- */
+      function buildRain(c) {
+        var ch = CH.rain;
+        ch.out = c.createGain();
+        ch.out.gain.value = 0;
+        ch.out.connect(masterGain);
+
+        var src = noiseOn(c, 1);
+        var hp = c.createBiquadFilter();
+        hp.type = "highpass"; hp.frequency.value = 430;
+        var lp = c.createBiquadFilter();
+        lp.type = "lowpass"; lp.frequency.value = 2700; lp.Q.value = 0.5;
+        var bed = c.createGain(); bed.gain.value = 1;
+
+        var lfo = c.createOscillator();
+        lfo.frequency.value = 0.07;
+        var lfoGain = c.createGain();
+        lfoGain.gain.value = 0.18;
+        lfo.connect(lfoGain); lfoGain.connect(bed.gain);
+
+        src.connect(hp); hp.connect(lp); lp.connect(bed); bed.connect(ch.out);
+        src.start(); lfo.start();
+
+        (function thunderLoop() {
+          if (!audioReady) return;
+          ch.timer = setTimeout(function () {
+            if (!document.hidden) thunder(c, ch.out);
+            thunderLoop();
+          }, 16000 + Math.random() * 24000);
+        })();
+      }
+
+      function thunder(c, out) {
+        var t = c.currentTime;
+        var src = noiseOn(c, 0.55);
+        var lp = c.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.setValueAtTime(320, t);
+        lp.frequency.exponentialRampToValueAtTime(90, t + 3);
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.55, t + 0.6);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+        src.connect(lp); lp.connect(g); g.connect(out);
+        src.start(t, Math.random() * 1.5);
+        src.stop(t + 3.6);
+      }
+
+      /* --- cafe ambience + cup clinks --- */
+      function buildCafe(c) {
+        var ch = CH.cafe;
+        ch.out = c.createGain();
+        ch.out.gain.value = 0;
+        ch.out.connect(masterGain);
+
+        var src = noiseOn(c, 0.6);
+        var hp = c.createBiquadFilter();
+        hp.type = "highpass"; hp.frequency.value = 90;
+        var lp = c.createBiquadFilter();
+        lp.type = "lowpass"; lp.frequency.value = 700; lp.Q.value = 0.3;
+        var bed = c.createGain(); bed.gain.value = 0.6;
+
+        var lfo = c.createOscillator();
+        lfo.frequency.value = 0.13;
+        var lg = c.createGain(); lg.gain.value = 0.14;
+        lfo.connect(lg); lg.connect(bed.gain);
+
+        src.connect(hp); hp.connect(lp); lp.connect(bed); bed.connect(ch.out);
+        src.start(); lfo.start();
+
+        (function clinkLoop() {
+          if (!audioReady) return;
+          ch.timer = setTimeout(function () {
+            if (!document.hidden) {
+              var times = 1 + Math.floor(Math.random() * 3);
+              for (var i = 0; i < times; i++) clink(c, ch.out, i * 0.16);
+            }
+            clinkLoop();
+          }, 4500 + Math.random() * 9000);
+        })();
+      }
+
+      function clink(c, out, delay) {
+        var t = c.currentTime + 0.01 + (delay || 0);
+        var o = c.createOscillator();
+        o.type = "triangle";
+        o.frequency.value = 1500 + Math.random() * 1500;
+        var bp = c.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = o.frequency.value * 1.2;
+        bp.Q.value = 4;
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.22, t + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+        o.connect(bp); bp.connect(g); g.connect(out);
+        o.start(t); o.stop(t + 0.5);
+      }
+
+      /* --- UI sounds --- */
+      function tickSound() {
+        if (!initAudio()) return;
+        var c = actx;
+        var t = c.currentTime;
+        var o = c.createOscillator();
+        o.type = "square";
+        o.frequency.value = 1250;
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.05, t + 0.003);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+        o.connect(g); g.connect(sfxGain);
+        o.start(t); o.stop(t + 0.08);
+      }
+
+      function leverSound() {
+        if (!initAudio()) return;
+        var c = actx;
+        var t = c.currentTime;
+        var o = c.createOscillator();
+        o.type = "sine";
+        o.frequency.setValueAtTime(300, t);
+        o.frequency.exponentialRampToValueAtTime(90, t + 0.22);
+        var g = c.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.22, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+        o.connect(g); g.connect(sfxGain);
+        o.start(t); o.stop(t + 0.32);
+      }
+
+      /* a single bell voice: root + inharmonic partial for a real bell timbre */
+      function bellStrike(c, at, freq, peak) {
+        var o = c.createOscillator();
+        var o2 = c.createOscillator();
+        var g = c.createGain();
+        var g2 = c.createGain();
+        o.type = "sine";
+        o.frequency.value = freq;
+        o2.type = "sine";
+        o2.frequency.value = freq * 2.02;
+        g2.gain.value = 0.3;
+        o2.connect(g2); g2.connect(g);
+        o.connect(g);
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + 1.7);
+        g.connect(sfxGain);
+        o.start(at); o.stop(at + 1.8);
+        o2.start(at); o2.stop(at + 1.8);
+      }
+
+      function playChime() {
+        if (!initAudio()) return;
+        var c = actx;
+        if (!sfxGain) return;
+        resumeAudio();
+        var t = c.currentTime + 0.08;
+        var chord = [523.25, 659.25, 783.99];
+
+        /* three bell strikes so the finish is never missed */
+        [0, 1.05, 2.10].forEach(function (off, i) {
+          var octave = i === 2 ? 2 : 1;
+          chord.forEach(function (f) {
+            bellStrike(c, t + off, f * octave, 0.24);
+          });
+          bellStrike(c, t + off, 261.63, 0.2);
+        });
+
+        /* fanfare sparkle on top of the first strike */
+        [523.25, 659.25, 783.99, 1046.50].forEach(function (f, i) {
+          var o = c.createOscillator();
+          var g = c.createGain();
+          o.type = "triangle";
+          o.frequency.value = f;
+          var at = t + i * 0.12;
+          g.gain.setValueAtTime(0.0001, at);
+          g.gain.exponentialRampToValueAtTime(0.3, at + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + 1.15);
+          o.connect(g); g.connect(sfxGain);
+          o.start(at); o.stop(at + 1.25);
+        });
+        /* shimmer bells */
+        for (var i = 0; i < 16; i++) {
+          var f = 1568 + Math.random() * 1800;
+          var at = t + 0.35 + Math.random() * 3.2;
+          var o2 = c.createOscillator();
+          var g2 = c.createGain();
+          o2.type = "sine";
+          o2.frequency.value = f;
+          g2.gain.setValueAtTime(0.0001, at);
+          g2.gain.exponentialRampToValueAtTime(0.05, at + 0.01);
+          g2.gain.exponentialRampToValueAtTime(0.0001, at + 0.75);
+          o2.connect(g2); g2.connect(sfxGain);
+          o2.start(at); o2.stop(at + 0.8);
+        }
+        /* warm bell underneath */
+        var bell = c.createOscillator();
+        var bg = c.createGain();
+        bell.type = "sine";
+        bell.frequency.value = 261.63;
+        bg.gain.setValueAtTime(0.0001, t);
+        bg.gain.exponentialRampToValueAtTime(0.18, t + 0.05);
+        bg.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+        bell.connect(bg); bg.connect(sfxGain);
+        bell.start(t); bell.stop(t + 2.7);
+      }
+
+      /* if the tab is in the background when the timer ends, hold the chime
+         and play it the moment the user comes back */
+      function playChimeOrDefer() {
+        if (document.hidden) pendingChime = true; /* replay the moment they return */
+        playChime();                              /* ...always fire it right now too */
+      }
+
+      /* ==================================================================
+         3. SOUNDBOARD UI
+         ================================================================== */
+      document.querySelectorAll(".sound-row").forEach(function (row) {
+        var key = row.getAttribute("data-ch");
+        var ch = CH[key];
+        var muteBtn = row.querySelector(".mute-btn");
+        var vol = row.querySelector(".vol");
+        var valLabel = row.querySelector(".vol-val");
+
+        muteBtn.addEventListener("click", function () {
+          initAudio();
+          ch.muted = !ch.muted;
+          muteBtn.classList.toggle("is-muted", ch.muted);
+          muteBtn.setAttribute("aria-pressed", ch.muted ? "true" : "false");
+          applyChannel(key);
+        });
+
+        vol.addEventListener("input", function () {
+          initAudio();
+          ch.vol = parseInt(vol.value, 10);
+          vol.style.setProperty("--val", ch.vol);
+          valLabel.textContent = ch.vol + "%";
+          if (ch.vol > 0 && ch.muted) {
+            ch.muted = false;
+            muteBtn.classList.remove("is-muted");
+            muteBtn.setAttribute("aria-pressed", "false");
+          }
+          applyChannel(key);
+        });
+      });
+
+      /* audio lives behind the browser autoplay policy: every gesture re-arms it,
+         so a long focus session can never silence the finish chime */
+      var audioUnlocked = false;
+      var pendingChime = false;
+
+      function resumeAudio() {
+        var c = audioCtx();
+        if (!c || typeof c.resume !== "function") return;
+        if (c.state === "running") return;
+        var p = c.resume();
+        if (p && typeof p.catch === "function") p.catch(function () { /* needs a gesture */ });
+      }
+
+      function unlockAudio() {
+        if (!initAudio()) return;
+        audioUnlocked = true;
+        resumeAudio();
+      }
+
+      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
+        document.addEventListener(ev, unlockAudio, { passive: true, once: false });
+      });
+
+      /* came back after the timer already ended: replay the finish chime */
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) return;
+        resumeAudio();
+        if (pendingChime) { pendingChime = false; playChime(); }
+      });
+
+      /* ==================================================================
+         4. SLOT MACHINE ROLLERS
+         ================================================================== */
+      var EASE = {
+        outQuint: function (t) { return 1 - Math.pow(1 - t, 5); },
+        outCubic: function (t) { return 1 - Math.pow(1 - t, 3); },
+        inOutQuad: function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+      };
+
+      var activeRollers = [];
+      var rafId = null;
+
+      function rollerLoop(now) {
+        rafId = null;
+        for (var i = activeRollers.length - 1; i >= 0; i--) {
+          var r = activeRollers[i];
+          var t = r.dur > 0 ? Math.min(1, (now - r.t0) / r.dur) : 1;
+          r.pos = r.from + (r.to - r.from) * r.ease(t);
+          renderRoller(r);
+          if (t >= 1) {
+            activeRollers.splice(i, 1);
+            r.animating = false;
+            if (r.onDone) r.onDone();
+          }
+        }
+        if (activeRollers.length && !rafId) rafId = requestAnimationFrame(rollerLoop);
+      }
+
+      function animateTo(r, to, dur, ease, onDone) {
+        r.from = r.pos;
+        r.to = to;
+        r.t0 = performance.now();
+        r.dur = dur;
+        r.ease = ease || EASE.outQuint;
+        r.onDone = onDone || null;
+        if (!r.animating) { r.animating = true; activeRollers.push(r); }
+        if (!rafId) rafId = requestAnimationFrame(rollerLoop);
+      }
+
+      function rollerValue(r) {
+        return ((Math.round(r.pos) % 60) + 60) % 60;
+      }
+
+      function renderRoller(r) {
+        if (!r.itemH) return;
+        var wrapped = ((r.pos % 60) + 60) % 60 + 60; /* always inside the middle copy */
+        r.reel.style.transform = "translate3d(0," + (-wrapped * r.itemH).toFixed(2) + "px,0)";
+      }
+
+      function measureRoller(r) {
+        var item = r.reel.firstElementChild;
+        if (!item) return;
+        var h = item.getBoundingClientRect().height;
+        r.itemH = h > 0 ? h : 1;
+        renderRoller(r);
+      }
+
+      function createRoller(root, value) {
+        var reel = root.querySelector(".reel");
+        var frag = document.createDocumentFragment();
+        for (var copy = 0; copy < 3; copy++) {
+          for (var i = 0; i < 60; i++) {
+            var s = document.createElement("span");
+            s.className = "reel-item";
+            s.textContent = String(i).length < 2 ? "0" + i : String(i);
+            frag.appendChild(s);
+          }
+        }
+        reel.appendChild(frag);
+
+        var r = {
+          root: root,
+          reel: reel,
+          pos: 60 + value,
+          itemH: 0,
+          animating: false,
+          onDone: null,
+          dragging: false
+        };
+        measureRoller(r);
+        attachRollerInput(r);
+        return r;
+      }
+
+      function attachRollerInput(r) {
+        var startY = 0;
+        var startPos = 0;
+
+        r.root.addEventListener("pointerdown", function (e) {
+          if (running || spinning) return;
+          r.dragging = true;
+          startY = e.clientY;
+          startPos = r.pos;
+          r.root.classList.add("dragging");
+          try { r.root.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+          e.preventDefault();
+        });
+
+        r.root.addEventListener("pointermove", function (e) {
+          if (!r.dragging) return;
+          var dy = e.clientY - startY;
+          r.pos = startPos - dy / Math.max(1, r.itemH);
+          renderRoller(r);
+        });
+
+        function endDrag() {
+          if (!r.dragging) return;
+          r.dragging = false;
+          r.root.classList.remove("dragging");
+          var target = Math.round(r.pos);
+          animateTo(r, target, 280, EASE.outCubic, function () {
+            r.pos = target;
+            tickSound();
+            syncFromRollers();
+          });
+        }
+
+        r.root.addEventListener("pointerup", endDrag);
+        r.root.addEventListener("pointercancel", endDrag);
+        r.root.addEventListener("pointerleave", function () { if (r.dragging) endDrag(); });
+
+        r.root.addEventListener("wheel", function (e) {
+          if (running || spinning) return;
+          e.preventDefault();
+          var step = e.deltaY > 0 ? 1 : -1;
+          animateTo(r, Math.round(r.pos) + step, 170, EASE.outCubic, function () {
+            tickSound();
+            syncFromRollers();
+          });
+        }, { passive: false });
+      }
+
+      var minRoller, secRoller;
+      minRoller = createRoller(document.querySelector('.roller[data-roller="min"]'), 25);
+      secRoller = createRoller(document.querySelector('.roller[data-roller="sec"]'), 0);
+
+      window.addEventListener("resize", function () {
+        clearTimeout(window.__rollResize);
+        window.__rollResize = setTimeout(function () {
+          measureRoller(minRoller);
+          measureRoller(secRoller);
+        }, 140);
+      });
+
+      /* ==================================================================
+         5. TIMER
+         ================================================================== */
+      var mickeyEl = document.getElementById("mickey");
+      var headEl = document.getElementById("mickeyHead");
+      var leverEl = document.getElementById("lever");
+      var btnStart = document.getElementById("btnStart");
+      var btnReset = document.getElementById("btnReset");
+      var statusLine = document.getElementById("statusLine");
+      var timerCard = document.getElementById("timerCard");
+
+      var running = false;
+      var spinning = false;
+      var remain = 1500;
+      var sessionTotal = 1500;
+      var curMin = 25;
+      var curSec = 0;
+      var endTs = 0;
+      var timerId = null;
+      var presetMin = 25;
+      var presetSec = 0;
+
+      function fmt(total) {
+        var m = Math.floor(total / 60);
+        var s = total % 60;
+        return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+      }
+
+      function readRollers() {
+        return rollerValue(minRoller) * 60 + rollerValue(secRoller);
+      }
+
+      function syncProgress() {
+        var pct = sessionTotal > 0 ? Math.max(0, Math.min(100, (remain / sessionTotal) * 100)) : 0;
+        headEl.style.setProperty("--progress", pct.toFixed(2));
+      }
+
+      function updateUI() {
+        btnStart.textContent = running ? "[ ❚❚ Pause ]" : "[ ▶ Start ]";
+        mickeyEl.classList.toggle("running", running);
+        if (running) {
+          statusLine.innerHTML = "專注中 · 剩餘 <strong>" + fmt(remain) + "</strong> 魔法時間";
+        } else if (remain <= 0 && sessionTotal > 0) {
+          statusLine.innerHTML = "任務完成！米奇為你鼓掌！";
+        } else if (remain < sessionTotal) {
+          statusLine.innerHTML = "已暫停 · 剩餘 <strong>" + fmt(remain) + "</strong>";
+        } else {
+          statusLine.innerHTML = "準備開始 <strong>" + fmt(readRollers()) + "</strong> 的專注魔法";
+        }
+        syncProgress();
+      }
+
+      function syncFromRollers() {
+        if (running || spinning) return;
+        sessionTotal = readRollers();
+        remain = sessionTotal;
+        curMin = Math.floor(remain / 60);
+        curSec = remain % 60;
+        updateUI();
+      }
+
+      function stepTo(left) {
+        var m = Math.floor(left / 60);
+        var s = left % 60;
+        var ds = -(((curSec - s) % 60 + 60) % 60);
+        if (ds !== 0) animateTo(secRoller, secRoller.pos + ds, 420, EASE.inOutQuad);
+        curSec = s;
+        var dm = m - curMin;
+        if (dm !== 0) {
+          animateTo(minRoller, minRoller.pos + dm, 520, EASE.inOutQuad);
+          curMin = m;
+        }
+      }
+
+      function onTick() {
+        var raw = (endTs - performance.now()) / 1000;
+        var left = Math.max(0, Math.ceil(raw - 0.05));
+        if (left !== remain) {
+          remain = left;
+          stepTo(remain);
+          updateUI();
+        }
+        if (remain <= 0) stopTimer(true);
+      }
+
+      function startTimer() {
+        if (running || spinning) return;
+        if (readRollers() <= 0) {
+          spinTo(25, 0, startTimer);
+          return;
+        }
+        unlockAudio();
+        running = true;
+        sessionTotal = readRollers();
+        remain = sessionTotal;
+        curMin = Math.floor(remain / 60);
+        curSec = remain % 60;
+        endTs = performance.now() + remain * 1000;
+        if (timerId) clearInterval(timerId);
+        timerId = setInterval(onTick, 100);
+        leverEl.classList.add("engaged");
+        leverSound();
+        updateUI();
+      }
+
+      function stopTimer(finished) {
+        if (timerId) { clearInterval(timerId); timerId = null; }
+        var wasRunning = running;
+        running = false;
+        leverEl.classList.remove("engaged");
+        updateUI();
+        if (finished) {
+          remain = 0;
+          updateUI();
+          playChimeOrDefer();
+          try { celebrate(); } catch (err) { /* confetti is optional */ }
+          timerCard.classList.remove("celebrate");
+          void timerCard.offsetWidth;
+          timerCard.classList.add("celebrate");
+        } else if (wasRunning) {
+          statusLine.innerHTML = "已暫停 · 剩餘 <strong>" + fmt(remain) + "</strong>";
+        }
+      }
+
+      function toggleStart() {
+        if (spinning) return;
+        if (running) stopTimer(false);
+        else startTimer();
+      }
+
+      function spinTo(min, sec, cb) {
+        if (spinning) return;
+        if (running) stopTimer(false);
+        unlockAudio();
+        spinning = true;
+        leverEl.classList.add("engaged");
+        leverSound();
+
+        var curM = rollerValue(minRoller);
+        var curS = rollerValue(secRoller);
+        var mDelta = ((min - curM + 60) % 60) + 60 * 3;
+        var sDelta = ((sec - curS + 60) % 60) + 60 * 4;
+        var left = 2;
+
+        function done() {
+          left -= 1;
+          if (left > 0) return;
+          spinning = false;
+          leverEl.classList.remove("engaged");
+          curMin = min;
+          curSec = sec;
+          remain = min * 60 + sec;
+          sessionTotal = remain;
+          presetMin = min;
+          presetSec = sec;
+          minRoller.root.setAttribute("aria-valuenow", min);
+          secRoller.root.setAttribute("aria-valuenow", sec);
+          updateUI();
+          if (cb) cb();
+        }
+
+        animateTo(minRoller, minRoller.pos + mDelta, 1700, EASE.outQuint, done);
+        animateTo(secRoller, secRoller.pos + sDelta, 2400, EASE.outQuint, done);
+      }
+
+      function resetTimer() {
+        spinTo(presetMin, presetSec);
+      }
+
+      /* ==================================================================
+         6. CELEBRATION
+         ================================================================== */
+      function celebrate() {
+        if (typeof confetti !== "function") return;
+        var colors = ["#FFD700", "#FFF0B3", "#E60012", "#FFFFFF", "#7FB2FF"];
+        var until = Date.now() + 2700;
+        (function frame() {
+          confetti({
+            particleCount: 4, angle: 60, spread: 62, origin: { x: 0, y: 0.75 },
+            colors: colors, startVelocity: 54, scalar: 0.9, ticks: 200
+          });
+          confetti({
+            particleCount: 4, angle: 120, spread: 62, origin: { x: 1, y: 0.75 },
+            colors: colors, startVelocity: 54, scalar: 0.9, ticks: 200
+          });
+          if (Date.now() < until) requestAnimationFrame(frame);
+        })();
+
+        var bursts = [[0.5, 0.32], [0.22, 0.5], [0.78, 0.44], [0.5, 0.62], [0.36, 0.3], [0.64, 0.36]];
+        bursts.forEach(function (b, i) {
+          setTimeout(function () {
+            confetti({
+              particleCount: 120, spread: 92, origin: { x: b[0], y: b[1] },
+              colors: colors, startVelocity: 44, gravity: 0.95, ticks: 220, scalar: 1.05,
+              shapes: ["circle", "square"]
+            });
+          }, 160 + i * 380);
+        });
+      }
+
+      /* ==================================================================
+         7. QUOTES
+         ================================================================== */
+      var QUOTES = [
+        { t: "只要你有勇氣去追求，所有的夢想都能成真。", a: "Walt Disney" },
+        { t: "繼續往前游，別停下來。", a: "《海底總動員》Dory" },
+        { t: "哈庫那馬塔塔，意思是沒有煩惱。", a: "《獅子王》Timon & Pumbaa" },
+        { t: "記住你是誰，你是唯一能定義自己的人。", a: "《獅子王》Mufasa" },
+        { t: "重要的不是你有多快，而是你願不願意繼續走。", a: "《動物方城市》Judy Hopps" },
+        { t: "星星會指引你，只要你願意抬頭看。", a: "《公主與青蛙》Ray" },
+        { t: "魔法不在遠方，它就在你專注的每一分鐘裡。", a: "Mickey Mouse" },
+        { t: "相信你的直覺，米奇一直都是這樣做的。", a: "Mickey Mouse" },
+        { t: "就算今天是雨天，也要讓心裡的城堡亮著燈。", a: "Disneyland" },
+        { t: "一點點勇氣，就能開啟一整個世界。", a: "《阿拉丁》Jasmine" }
+      ];
+
+      var quoteIndex = 0;
+      var quoteCard = document.getElementById("quoteCard");
+      var quoteText = document.getElementById("quoteText");
+      var quoteAuthor = document.getElementById("quoteAuthor");
+      var btnQuote = document.getElementById("btnQuote");
+
+      btnQuote.addEventListener("click", function () {
+        var next = quoteIndex;
+        while (next === quoteIndex) next = Math.floor(Math.random() * QUOTES.length);
+        quoteIndex = next;
+        quoteCard.classList.add("quote-fading");
+        setTimeout(function () {
+          quoteText.textContent = QUOTES[quoteIndex].t;
+          quoteAuthor.textContent = QUOTES[quoteIndex].a;
+          quoteCard.classList.remove("quote-fading");
+          tickSound();
+        }, 280);
+      });
+
+      /* ==================================================================
+         8. WIRING
+         ================================================================== */
+      btnStart.addEventListener("click", toggleStart);
+      btnReset.addEventListener("click", function () { resetTimer(); tickSound(); });
+      leverEl.addEventListener("click", toggleStart);
+      document.getElementById("btnChime").addEventListener("click", function () {
+        unlockAudio();
+        playChime();
+      });
+
+      document.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          if (spinning) return;
+          document.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+          chip.classList.add("active");
+          var minutes = parseInt(chip.getAttribute("data-preset"), 10);
+          spinTo(minutes, 0);
+          tickSound();
+        });
+      });
+
+      document.addEventListener("keydown", function (e) {
+        var tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "BUTTON" || tag === "TEXTAREA") return;
+        if (e.code === "Space") {
+          e.preventDefault();
+          toggleStart();
+        }
+      });
+
+      /* first paint */
+      requestAnimationFrame(function () {
+        measureRoller(minRoller);
+        measureRoller(secRoller);
+        updateUI();
+      });
+    })();
+  </script>
+
+  <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
